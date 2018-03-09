@@ -15,7 +15,6 @@ import com.codeclan.rain.graphics.Screen;
 public class Game extends Canvas implements Runnable {
 
 	private static final long serialVersionUID = 1L;
-	public static String title = "Rain";
 	public static int width = 300;
 //	Creates a 16/9 aspect ratio.
 	public static int height = width / 16 * 9;
@@ -71,46 +70,15 @@ public class Game extends Canvas implements Runnable {
 //	Run method is called when we call thread.start because our thread has the context of this class.
 @Override
 public void run() {
-//	Create variable to get system time in nanoseconds.
-	long lastTime = System.nanoTime();
-	long timer= System.currentTimeMillis();
-//	Convert to milliseconds and divide by number of we want our loop to run per second.
-	final double ns = 1000000000.0 / 60.0;
-	double delta = 0;
-//	Count how many frames we can render every second.
-	int frames = 0;
-//	Count how many times we can run game logic per loop per second.
-	int updates = 0;
 	while(running){
-//		Ensure that update runs no faster than 60 times per second.
-		long now = System.nanoTime();
-		delta += (now - lastTime) / ns;
-		lastTime = now;
-		
-		while (delta >= 1){
 //		Buffer strategy. Graphical processes and game logic are handled separately.
 //		Update/tick handles the game logic. (Restricted to 60fps)
 //		Render handles the graphics.(no restriction on fps)
 //		|-Screen---|-Next image in buffer---|Next image in buffer.
 //		If our first image in queue is finished early, instead of making the computer wait, we can let it get started on the next one.
 		update();
-		updates ++;
-		delta--;
-		
-		}
 		render();
-		frames++;
-		
-//		Execute the following once per second.
-		if(System.currentTimeMillis() - timer > 1000){
-			timer += 1000;
-			System.out.println(updates + "updates, " + frames + " frames per second");
-			frame.setTitle(title + " | " + updates + "Updates, " + frames + " fps");
-			updates = 0;
-			frames = 0;
-		}
 	}
-	stop();
 	
 }
 
@@ -128,8 +96,6 @@ public void render(){
 		createBufferStrategy(3);
 		return;
 	}
-//	Use the Screen class clear method to fill the pixel array with black pixels.
-	screen.clear();
 // Use the render method in our Sreen class to render.	
 	screen.render();
 	
@@ -142,8 +108,8 @@ public void render(){
 	Graphics g = bs.getDrawGraphics();
 //	All graphics instructions go between here....
 //	---------------------------------------------
-//	g.setColor(Color.BLACK);
-//	g.fillRect(0, 0, getWidth(), getHeight());
+	g.setColor(Color.BLACK);
+	g.fillRect(0, 0, getWidth(), getHeight());
 
 //	Draw the buffered image (which has our latest pixel data via the screen class) to the screen.
 	g.drawImage(image, 0, 0, getWidth(), getHeight(), null);

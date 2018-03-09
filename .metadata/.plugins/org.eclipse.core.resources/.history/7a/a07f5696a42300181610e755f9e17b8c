@@ -15,7 +15,6 @@ import com.codeclan.rain.graphics.Screen;
 public class Game extends Canvas implements Runnable {
 
 	private static final long serialVersionUID = 1L;
-	public static String title = "Rain";
 	public static int width = 300;
 //	Creates a 16/9 aspect ratio.
 	public static int height = width / 16 * 9;
@@ -105,7 +104,6 @@ public void run() {
 		if(System.currentTimeMillis() - timer > 1000){
 			timer += 1000;
 			System.out.println(updates + "updates, " + frames + " frames per second");
-			frame.setTitle(title + " | " + updates + "Updates, " + frames + " fps");
 			updates = 0;
 			frames = 0;
 		}
