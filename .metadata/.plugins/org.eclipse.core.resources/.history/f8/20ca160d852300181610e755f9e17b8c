@@ -1,0 +1,128 @@
+package com.codeclan.rain;
+
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
+
+import javax.swing.JFrame;
+
+import com.codeclan.rain.graphics.Screen;
+
+public class Game extends Canvas implements Runnable {
+
+	private static final long serialVersionUID = 1L;
+	public static int width = 300;
+//	Creates a 16/9 aspect ratio.
+	public static int height = width / 16 * 9;
+//	using scale our game window will actually be 900 in size but it will only render for 300.
+//	This keeps the resolution low and performance high, since this game is in pure java and is not involving the graphics card.
+	public static int scale = 3;
+//	This thread will handle running the game itself.
+	private Thread thread;
+	private JFrame frame;
+//	Boolean for game loop;
+	private boolean running = false;
+//	Declare our screen object;
+	private Screen screen;
+//	A buffered image is basically a chunk of data which represents an image;
+//	So, here we create an image for us to draw things on to.
+	private BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+//	From the buffered image, create an array of integers which represent colours.
+//	We can modify this array and reverse the process, thus allowing us create a bufferedImage.
+//	So this line of code allows us to draw things on the BufferedImage object.
+//	cmd + shift + o to import DataBufferInt.
+	private int[] pixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
+	
+	
+	public Game(){
+		Dimension size = new Dimension(width * scale, height * scale);
+		setPreferredSize(size);
+		screen = new Screen(width, height);
+		frame = new JFrame();
+		
+	}
+	
+	
+//	synchronised ensure there are no overlaps between instructions in different threads which would cause a crash. 
+	public synchronized void start(){
+		running = true;
+		thread = new Thread(this, "Game Display");
+		thread.start();
+	}
+	
+//  Method to properly stop the thread.
+//	If the game is running in an applet or browser, the browser window will still be useable after the game is stopped.
+	public synchronized void stop(){
+		running = false;
+		try {
+			thread.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+//	Run method is called when we call thread.start because our thread has the context of this class.
+@Override
+public void run() {
+	while(running){
+//		Buffer strategy. Graphical processes and game logic are handled separately.
+//		Update/tick handles the game logic. (Restricted to 60fps)
+//		Render handles the graphics.(no restriction on fps)
+//		|-Screen---|-Next image in buffer---|Next image in buffer.
+//		If our first image in queue is finished early, instead of making the computer wait, we can let it get started on the next one.
+		update();
+		render();
+	}
+	
+}
+
+public void update(){
+	
+}
+
+public void render(){
+//	Retrieve the Canvas (which we inherit from) bufferstrategy.
+	BufferStrategy bs = getBufferStrategy();
+//	We only want to create a buffer strategy once, not on every game loop.
+//	Triple buffering (3) is always recommended.
+//	Triple buffering allows us to queue up 2 render images(arrays of pixels) instead of one.
+	if (bs == null){
+		createBufferStrategy(3);
+		return;
+	}
+//	Set our buffer strategy to accept our graphics
+	Graphics g = bs.getDrawGraphics();
+//	All graphics instructions go between here....
+//	---------------------------------------------
+	g.setColor(Color.BLACK);
+	g.fillRect(0, 0, getWidth(), getHeight());
+	
+//	And here.....................................
+//	---------------------------------------------
+	
+//	dispose cleans out our buffers after every frame in order to accept more graphics.
+	g.dispose();
+//	Make the image available in our buffer appear on screen.
+	bs.show();
+}
+
+public static void main(String[] args){
+	Game game = new Game();
+	game.frame.setResizable(false);
+	game.frame.setTitle("Rain");
+//	Game inherits from canvas which we can add objects to.
+	game.frame.add(game);
+//	Set size of frame to be same size as component(game).
+	game.frame.pack();
+	game.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//	Frame appears in middle of screen.
+	game.frame.setLocationRelativeTo(null);
+	game.frame.setVisible(true);
+	game.start();
+}
+
+}

@@ -1,0 +1,71 @@
+package com.codeclan.rain;
+
+import java.awt.Canvas;
+import java.awt.Dimension;
+
+import javax.swing.JFrame;
+
+public class Game extends Canvas implements Runnable {
+
+	private static final long serialVersionUID = 1L;
+	public static int width = 300;
+//	Creates a 16/9 aspect ratio.
+	public static int height = width / 16 * 9;
+//	using scale our game window will actually be 900 in size but ut will only render for 300.
+//	This keeps the resolution low and performance high, since this game is in pure java and is not involving the graphics card.
+	public static int scale = 3;
+//	This thread will handle running the game itself.
+	private Thread thread;
+	private JFrame frame;
+//	Boolean for game loop;
+	private boolean running = false;
+	
+	
+	public Game(){
+		Dimension size = new Dimension(width * scale, height * scale);
+		setPreferredSize(size);
+		frame = new JFrame();
+	}
+	
+	
+//	synchronised ensure there are no overlaps between instructions in different threads which would cause a crash. 
+	public synchronized void start(){
+		running = true;
+		thread = new Thread(this, "Game Display");
+		thread.start();
+	}
+	
+//  Method to properly stop the thread.
+//	If the game is running in an applet or browser, the browser window will still be useable after the game is stopped.
+	public synchronized void stop(){
+		running = false;
+		try {
+			thread.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+@Override
+public void run() {
+	while(running){
+		System.out.println("Running.......");
+	}
+	
+}
+
+public static void main(String[] args){
+	Game game = new Game();
+	game.frame.setResizable(false);
+	game.frame.setTitle("Rain");
+//	Game inherits from canvas which we can add objects to.
+	game.frame.add(game);
+//	Set size of frame to be same size as component(game).
+	game.frame.pack();
+	game.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	game.frame.setLocationRelativeTo(null);
+	game.frame.setVisible(true);
+	game.start();
+}
+
+}

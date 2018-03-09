@@ -1,0 +1,14 @@
+package com.codeclan.rain.graphics;
+
+// Screen represent our game screen and handle how we set the pixels.
+public class Screen {
+	private int width;
+	private int height;
+//	array to contain all our pixel data.
+	public int[] pixels;
+	
+	public Screen(int width, int height){
+		this.width = width;
+		this.height = height;
+	}
+}
